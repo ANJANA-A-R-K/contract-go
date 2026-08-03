@@ -572,11 +572,10 @@ import (
 )
 
 func main() {
-    // Public image — container name auto-derived
     yaml, inputSHA, outputSHA, err := imagespec.GenerateImageSpec(
         "quay.io/sclorg/postgresql-15-c9s:latest",
-        "",    // empty → derived from image reference
-        nil,   // nil → anonymous / public registry
+        "",
+        nil,
     )
     if err != nil {
         log.Fatal(err)
