@@ -115,6 +115,16 @@ Learn more:
   - JWS (JSON Web Signature) compact serialization format
   - Compatible with Go crypto packages for decryption
 
+- **Rego Policy Generation**
+  - Generate OPA v1 Rego policy from a Kubernetes pod YAML (Pod, Deployment, StatefulSet, DaemonSet, CronJob)
+  - Automatically extract container images and commands to generate `allow_image()` and `allow_command()` rules
+  - Strict per-argument validation for containers with explicit `command`/`args`
+  - Permissive image-only validation for ENTRYPOINT-only containers (no `command`/`args` in spec)
+  - Multiline shell scripts extracted into named validator functions
+  - OCP baseline rules for Kata pause/infra containers included automatically
+  - Returns plain policy string, Base64 of input pod YAML, and Base64 of generated policy
+  - Compatible with IBM Kata Agent Policy enforcement in Confidential Computing environments
+
 - **Image Spec Generation**
   - Fetch OCI image config from any registry (public or private)
   - Generate Kubernetes pod YAML snippet with correct `env`, `command`, `args`, `securityContext`, and `ports`
@@ -559,6 +569,42 @@ MIIEpAIBAAKCAQEA...
 }
 ```
 
+### Generate a Rego Policy
+
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+    "os"
+
+    "github.com/ibm-hyper-protect/contract-go/v2/rego"
+)
+
+func main() {
+    // Read pod YAML
+    podYAML, err := os.ReadFile("pod.yaml")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Generate OPA Rego policy from the pod spec
+    policy, podYAMLBase64, policyBase64, err := rego.GenerateRegoPolicy(string(podYAML), "")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Println("Generated Policy:", policy)
+    fmt.Println("Pod YAML (Base64):", podYAMLBase64)
+    fmt.Println("Policy (Base64):", policyBase64)
+
+}
+```
+
+> **Note:** Pass an empty string `""` as `templatePath` to use the embedded default OPA v1 template.
+> Provide a custom file path to use your own Rego template with the generator marker.
+
 ### Generate a Pod YAML Spec from an OCI Image
 
 ```go
@@ -573,23 +619,26 @@ import (
 
 func main() {
     // Public image — container name auto-derived
-    yaml, inputSHA, outputSHA, err := imagespec.GenerateImageSpec(
+    yaml, imageUser, inputSHA, outputSHA, err := imagespec.GenerateImageSpec(
         "quay.io/sclorg/postgresql-15-c9s:latest",
-        "",    // empty → derived from image reference
-        nil,   // nil → anonymous / public registry
+        "",  // empty → derived from image reference
+        "",  // no credentials needed
+        "",
     )
     if err != nil {
         log.Fatal(err)
     }
     fmt.Println(yaml)
+    fmt.Println("Image user:   ", imageUser)
     fmt.Println("Input SHA256: ", inputSHA)
     fmt.Println("Output SHA256:", outputSHA)
 
     // Private registry
-    yaml, _, _, err = imagespec.GenerateImageSpec(
+    yaml, _, _, _, err = imagespec.GenerateImageSpec(
         "us.icr.io/my-ns/my-app:latest",
         "my-app",
-        &imagespec.AuthConfig{Username: "iamapikey", Password: "<API_KEY>"},
+        "iamapikey",
+        "<API_KEY>",
     )
     if err != nil {
         log.Fatal(err)

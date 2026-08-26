@@ -1,3 +1,13 @@
+## <small>2.41.1 (2026-08-20)</small>
+
+* fix(deps): update module k8s.io/api to v0.36.4 (#303) ([8855018](https://github.com/ibm-hyper-protect/contract-go/commit/8855018)), closes [#303](https://github.com/ibm-hyper-protect/contract-go/issues/303)
+
+## 2.41.0 (2026-08-19)
+
+* fix: Fixed Release Workflow (#302) ([2598424](https://github.com/ibm-hyper-protect/contract-go/commit/2598424)), closes [#302](https://github.com/ibm-hyper-protect/contract-go/issues/302)
+* fix(deps): update module github.com/stretchr/testify to v1.12.1 (#299) ([8476245](https://github.com/ibm-hyper-protect/contract-go/commit/8476245)), closes [#299](https://github.com/ibm-hyper-protect/contract-go/issues/299)
+* feat: Rego Generator Public AP (#295) ([05cc278](https://github.com/ibm-hyper-protect/contract-go/commit/05cc278)), closes [#295](https://github.com/ibm-hyper-protect/contract-go/issues/295)
+
 ## [2.40.3](https://github.com/ibm-hyper-protect/contract-go/compare/v2.40.2...v2.40.3) (2026-08-17)
 
 ## [2.40.2](https://github.com/ibm-hyper-protect/contract-go/compare/v2.40.1...v2.40.2) (2026-08-07)
