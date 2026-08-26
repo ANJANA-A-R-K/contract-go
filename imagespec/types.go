@@ -15,12 +15,6 @@
 
 package imagespec
 
-// AuthConfig holds optional registry credentials for private image access.
-type AuthConfig struct {
-	Username string
-	Password string
-}
-
 // containerSnippet wraps the containers list under a "spec:" key so the
 // output can be pasted directly into a StatefulSet / Deployment manifest.
 type containerSnippet struct {

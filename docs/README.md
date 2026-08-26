@@ -2496,16 +2496,17 @@ The generated YAML includes a `# image user: <value>` comment at the top that id
 
 **Signature:**
 ```go
-func GenerateImageSpec(imageRef, containerName string, auth *AuthConfig) (string, string, string, string, error)
+func GenerateImageSpec(imageRef, containerName, username, password string) (string, string, string, string, error)
 ```
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `imageRef` | `string` | Fully-qualified OCI image reference (e.g. `quay.io/fedora/fedora:38` or digest ref) |
-| `containerName` | `string` | Name for the container in the generated pod spec; auto-derived from the image name when empty |
-| `auth` | `*AuthConfig` | Registry credentials; pass `nil` for public images |
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `imageRef` | `string` | Required | Fully-qualified OCI image reference (e.g. `quay.io/fedora/fedora:38` or digest ref) |
+| `containerName` | `string` | Optional | Name for the container in the generated pod spec; auto-derived from the image name when empty |
+| `username` | `string` | Optional | Registry username for private image access; pass `""` for public images |
+| `password` | `string` | Optional | Registry password / API key for private image access; pass `""` for public images |
 
 **Returns:**
 
@@ -2524,8 +2525,9 @@ import "github.com/ibm-hyper-protect/contract-go/v2/imagespec"
 // Public image — postgres uses numeric UID 26
 yaml, imageUser, inputSHA, outputSHA, err := imagespec.GenerateImageSpec(
     "quay.io/sclorg/postgresql-15-c9s:latest",
-    "",   // auto-derive name → "postgresql-15-c9s"
-    nil,
+    "",  // auto-derive name → "postgresql-15-c9s"
+    "",  // no credentials needed
+    "",
 )
 // imageUser == "26"
 // yaml starts with: # image user: 26
@@ -2534,7 +2536,8 @@ yaml, imageUser, inputSHA, outputSHA, err := imagespec.GenerateImageSpec(
 yaml, imageUser, _, _, err = imagespec.GenerateImageSpec(
     "docker.io/library/postgres:16",
     "postgres",
-    nil,
+    "",
+    "",
 )
 // imageUser == "postgres"
 // yaml starts with: # image user: postgres
@@ -2544,16 +2547,9 @@ yaml, imageUser, _, _, err = imagespec.GenerateImageSpec(
 yaml, imageUser, _, _, err = imagespec.GenerateImageSpec(
     "us.icr.io/my-ns/my-app:latest",
     "my-app",
-    &imagespec.AuthConfig{Username: "iamapikey", Password: "<API_KEY>"},
+    "iamapikey",
+    "<API_KEY>",
 )
-```
-
-**AuthConfig:**
-```go
-type AuthConfig struct {
-    Username string
-    Password string
-}
 ```
 
 **Error Messages:**

@@ -119,22 +119,22 @@ func TestGeneratePodYAMLTemplate_MultipleExposedPorts(t *testing.T) {
 }
 
 func TestFetchImageConfig_EmptyRef(t *testing.T) {
-	_, err := fetchImageConfig("", nil)
+	_, err := fetchImageConfig("", "", "")
 	assert.ErrorContains(t, err, "imageRef must not be empty")
 }
 
 func TestFetchImageConfig_InvalidRef(t *testing.T) {
-	_, err := fetchImageConfig(":::invalid:::", nil)
+	_, err := fetchImageConfig(":::invalid:::", "", "")
 	assert.ErrorContains(t, err, "failed to parse image reference")
 }
 
 func TestGenerateImageSpec_EmptyRef(t *testing.T) {
-	_, _, _, _, err := GenerateImageSpec("", "", nil)
+	_, _, _, _, err := GenerateImageSpec("", "", "", "")
 	assert.ErrorContains(t, err, "imageRef must not be empty")
 }
 
 func TestGenerateImageSpec_InvalidRef(t *testing.T) {
-	_, _, _, _, err := GenerateImageSpec(":::bad:::", "", nil)
+	_, _, _, _, err := GenerateImageSpec(":::bad:::", "", "", "")
 	assert.ErrorContains(t, err, "failed to parse image reference")
 }
 
@@ -304,10 +304,16 @@ func TestDeriveContainerName(t *testing.T) {
 		{"quay.io/ramachandra_ch/redis@sha256:8e845b2ad2eec813a04896d4e2e5588827e49d5394579c95f3651f0cb11c1cb0", "redis"},
 		{"quay.io/sclorg/postgresql-15-c9s", "postgresql-15-c9s"},
 		{"nginx:latest", "nginx"},
-		{"", "app"},
 		{"us.icr.io/hpvsonprem/daytradersealed:hpcc", "daytradersealed"},
 	}
 	for _, tc := range cases {
-		assert.Equal(t, tc.expected, deriveContainerName(tc.ref), "ref=%q", tc.ref)
+		got, err := deriveContainerName(tc.ref)
+		require.NoError(t, err, "ref=%q", tc.ref)
+		assert.Equal(t, tc.expected, got, "ref=%q", tc.ref)
 	}
+}
+
+func TestDeriveContainerName_InvalidRef(t *testing.T) {
+	_, err := deriveContainerName(":::invalid:::")
+	assert.ErrorContains(t, err, "failed to parse image reference")
 }

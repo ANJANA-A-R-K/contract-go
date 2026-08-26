@@ -33,21 +33,26 @@ import (
 // GenerateImageSpec fetches the OCI image config and generates a pod YAML snippet.
 // Returns (yaml, imageUser, inputSHA, outputSHA, error).
 // imageUser is a username (e.g. "postgres"), raw UID ("26"), or "no user specified".
-func GenerateImageSpec(imageRef, containerName string, auth *AuthConfig) (string, string, string, string, error) {
-	cfg, err := fetchImageConfig(imageRef, auth)
+// Pass empty strings for username and password to access public images anonymously.
+func GenerateImageSpec(imageRef, containerName, username, password string) (string, string, string, string, error) {
+	cfg, err := fetchImageConfig(imageRef, username, password)
 	if err != nil {
 		return "", "", "", "", err
 	}
 
 	if containerName == "" {
-		containerName = deriveContainerName(imageRef)
+		containerName, err = deriveContainerName(imageRef)
+		if err != nil {
+			return "", "", "", "", err
+		}
 	}
 
 	return generatePodYAMLTemplate(imageRef, cfg, containerName)
 }
 
-// fetchImageConfig pulls the OCI config layer from the registry (nil auth = public image).
-func fetchImageConfig(imageRef string, auth *AuthConfig) (*v1.Config, error) {
+// fetchImageConfig pulls the OCI config layer from the registry.
+// Pass empty strings for username/password to access public images anonymously.
+func fetchImageConfig(imageRef, username, password string) (*v1.Config, error) {
 	if strings.TrimSpace(imageRef) == "" {
 		return nil, fmt.Errorf("imageRef must not be empty")
 	}
@@ -58,10 +63,10 @@ func fetchImageConfig(imageRef string, auth *AuthConfig) (*v1.Config, error) {
 	}
 
 	var remoteOpts []remote.Option
-	if auth != nil && auth.Username != "" && auth.Password != "" {
+	if username != "" && password != "" {
 		remoteOpts = append(remoteOpts, remote.WithAuth(&authn.Basic{
-			Username: auth.Username,
-			Password: auth.Password,
+			Username: username,
+			Password: password,
 		}))
 	} else {
 		// Anonymous avoids credential-helper errors when Docker keychain helpers are not in PATH.
@@ -75,14 +80,15 @@ func fetchImageConfig(imageRef string, auth *AuthConfig) (*v1.Config, error) {
 
 	cfgFile, err := img.ConfigFile()
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config from image %q: %w", imageRef, err)
+		digest, _ := img.Digest()
+		return nil, fmt.Errorf("failed to read config from image %q: %w", digest, err)
 	}
 
 	return &cfgFile.Config, nil
 }
 
 // resolveImageUser parses the OCI User field into a label and numeric uid/gid (-1 if absent).
-func resolveImageUser(rawUser string) (label string, uid int64, gid int64) {
+func resolveImageUser(rawUser string) (label string, uid, gid int64) {
 	if rawUser == "" {
 		return "no user specified", -1, -1
 	}
@@ -193,18 +199,18 @@ func generatePodYAMLTemplate(imageRef string, cfg *v1.Config, containerName stri
 	}
 
 	yamlStr := fmt.Sprintf("# image user: %s\n%s", imageUser, string(out))
-	return yamlStr, imageUser, gen.GenerateSha256(imageRef), gen.GenerateSha256(yamlStr), nil
+	return yamlStr, imageUser, gen.GenerateSha256(imageRef), gen.GenerateSha256(string(out)), nil
 }
 
 // deriveContainerName extracts the image name from a reference, e.g. "postgresql-15-c9s".
-func deriveContainerName(imageRef string) string {
+func deriveContainerName(imageRef string) (string, error) {
 	ref, err := name.ParseReference(imageRef)
 	if err != nil {
-		return "app"
+		return "", fmt.Errorf("failed to parse image reference %q: %w", imageRef, err)
 	}
 	n := path.Base(ref.Context().RepositoryStr())
 	if n == "" || n == "." {
-		return "app"
+		return "app", nil
 	}
-	return n
+	return n, nil
 }
