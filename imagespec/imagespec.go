@@ -210,7 +210,7 @@ func deriveContainerName(imageRef string) (string, error) {
 	}
 	n := path.Base(ref.Context().RepositoryStr())
 	if n == "" || n == "." {
-		return "app", nil
+		return "", fmt.Errorf("could not derive container name from image reference %q", imageRef)
 	}
 	return n, nil
 }
