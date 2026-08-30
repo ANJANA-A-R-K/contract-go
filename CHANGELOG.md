@@ -1,3 +1,7 @@
+## <small>2.41.2 (2026-08-27)</small>
+
+* fix(deps): update module k8s.io/api to v0.37.0 (#306) ([fe6f7f9](https://github.com/ibm-hyper-protect/contract-go/commit/fe6f7f9)), closes [#306](https://github.com/ibm-hyper-protect/contract-go/issues/306)
+
 ## <small>2.41.1 (2026-08-20)</small>
 
 * fix(deps): update module k8s.io/api to v0.36.4 (#303) ([8855018](https://github.com/ibm-hyper-protect/contract-go/commit/8855018)), closes [#303](https://github.com/ibm-hyper-protect/contract-go/issues/303)
