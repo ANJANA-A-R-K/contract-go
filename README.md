@@ -619,7 +619,7 @@ import (
 
 func main() {
     // Public image — container name auto-derived
-    yaml, imageUser, inputSHA, outputSHA, err := imagespec.GenerateImageSpec(
+    yaml, imageUser, inputSHA, outputSHA, err := imagespec.HpccGenerateImageSpec(
         "quay.io/sclorg/postgresql-15-c9s:latest",
         "",  // empty → derived from image reference
         "",  // no credentials needed
@@ -634,7 +634,7 @@ func main() {
     fmt.Println("Output SHA256:", outputSHA)
 
     // Private registry
-    yaml, _, _, _, err = imagespec.GenerateImageSpec(
+    yaml, _, _, _, err = imagespec.HpccGenerateImageSpec(
         "us.icr.io/my-ns/my-app:latest",
         "my-app",
         "iamapikey",

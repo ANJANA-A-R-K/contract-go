@@ -2636,7 +2636,7 @@ Where:
 
 ## Image Spec Functions
 
-### GenerateImageSpec
+### HpccGenerateImageSpec
 
 Fetches the OCI image config from a container registry and generates a Kubernetes pod YAML snippet in a single call. Designed for use with the `registryMapping` feature of confidential-containers workload contracts.
 
@@ -2653,7 +2653,7 @@ The generated YAML includes a `# image user: <value>` comment at the top that id
 
 **Signature:**
 ```go
-func GenerateImageSpec(imageRef, containerName, username, password string) (string, string, string, string, error)
+func HpccGenerateImageSpec(imageRef, containerName, username, password string) (string, string, string, string, error)
 ```
 
 **Parameters:**
@@ -2680,7 +2680,7 @@ func GenerateImageSpec(imageRef, containerName, username, password string) (stri
 import "github.com/ibm-hyper-protect/contract-go/v2/imagespec"
 
 // Public image — postgres uses numeric UID 26
-yaml, imageUser, inputSHA, outputSHA, err := imagespec.GenerateImageSpec(
+yaml, imageUser, inputSHA, outputSHA, err := imagespec.HpccGenerateImageSpec(
     "quay.io/sclorg/postgresql-15-c9s:latest",
     "",  // auto-derive name → "postgresql-15-c9s"
     "",  // no credentials needed
@@ -2690,7 +2690,7 @@ yaml, imageUser, inputSHA, outputSHA, err := imagespec.GenerateImageSpec(
 // yaml starts with: # image user: 26
 
 // Image with a named user (e.g. "postgres")
-yaml, imageUser, _, _, err = imagespec.GenerateImageSpec(
+yaml, imageUser, _, _, err = imagespec.HpccGenerateImageSpec(
     "docker.io/library/postgres:16",
     "postgres",
     "",
@@ -2701,7 +2701,7 @@ yaml, imageUser, _, _, err = imagespec.GenerateImageSpec(
 // NOTE: no securityContext.runAsUser is emitted for named users.
 
 // Private registry
-yaml, imageUser, _, _, err = imagespec.GenerateImageSpec(
+yaml, imageUser, _, _, err = imagespec.HpccGenerateImageSpec(
     "us.icr.io/my-ns/my-app:latest",
     "my-app",
     "iamapikey",
