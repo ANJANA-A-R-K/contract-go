@@ -867,9 +867,13 @@ JSON format (all platforms):
 {
   "ccrt": ["26.5.0", "26.7.2", "26.9.1"],
   "ccrv": ["26.5.0", "26.7.1", "26.9.0"],
-  "ccco": ["26.7.1", "26.4.0", "25.12.0",]
+  "ccco": ["1.2.2.2", "1.2.2.1", "1.2.2"]
 }
 ```
+
+> **Note:** CCCO versions are product bundle versions (`x.x.x` for GA, `x.x.x.x` for fixpack).
+> Three versions are always maintained: n (latest), n-1, and n-2.
+> ccrt, ccrv, and hpvs continue to use their existing date-based cert versions.
 
 YAML format (specific platform):
 ```yaml

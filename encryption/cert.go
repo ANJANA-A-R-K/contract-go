@@ -112,10 +112,15 @@ func loadCertificatesFromDir(osType string) {
 
 // extractVersionFromFilename extracts the version number from a certificate filename.
 // Supports patterns like:
+//   - ibm-confidential-computing-container-ccco-1.2.2-encrypt.crt   -> 1.2.2   (CCCO GA)
+//   - ibm-confidential-computing-container-ccco-1.2.2.1-encrypt.crt -> 1.2.2.1 (CCCO fixpack)
+//   - ibm-confidential-computing-container-ccco-1.2.2.2-encrypt.crt -> 1.2.2.2 (CCCO fixpack)
 //   - ibm-hyper-protect-container-runtime-26.2.0-encrypt.crt -> 26.2.0
 //   - ibm-confidential-computing-container-runtime-rhvs-26.4.1-encrypt.crt -> 26.4.1
-//   - ibm-hyper-protect-confidential-container-25.12.0-encrypt.crt -> 25.12.0
 //   - ibm-hyper-protect-container-runtime-1-0-s390x-28-encrypt.crt -> 1.0.28
+//
+// Note: CCCO uses product bundle version format (x.x.x for GA, x.x.x.x for fixpack).
+// All other platforms (ccrt, ccrv, hpvs) retain their existing date-based formats.
 func extractVersionFromFilename(filename string) string {
 	// Pattern to match semantic version (X.Y.Z or X.Y.Z.W)
 	re := regexp.MustCompile(`(\d+\.\d+\.\d+(?:\.\d+)?)-encrypt\.crt$`)

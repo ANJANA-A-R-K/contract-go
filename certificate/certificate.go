@@ -286,7 +286,12 @@ func HpcrValidateCertificateRevocationList(certificateDocument, ibmIntermediateC
 //
 //	// Get all OS types in JSON format
 //	allCerts, err := certificate.HpcrListAvailableEncCertVersions("", "json")
-//	// Returns: {"ccrt":["26.2.0","25.11.0"],"ccrv":["26.4.1","25.11.0"],"ccco":["25.12.0","25.10.0"],"hpvs":["26.5.0","26.2.0"]}
+//	// Returns: {"ccrt":["26.2.0","25.11.0"],"ccrv":["26.4.1","25.11.0"],"ccco":["1.2.2.2","1.2.2.1","1.2.2"],"hpvs":["26.5.0","26.2.0"]}
+//
+//	// Get ccco versions in JSON format (product bundle versions, latest first)
+//	cccoCerts, err := certificate.HpcrListAvailableEncCertVersions("ccco", "json")
+//	// Returns: {"ccco":["1.2.2.2","1.2.2.1","1.2.2"]}
+//	// n=1.2.2.2 (latest fixpack), n-1=1.2.2.1, n-2=1.2.2 (GA)
 //
 //	// Get specific OS type in YAML format
 //	hpvsCerts, err := certificate.HpcrListAvailableEncCertVersions("hpvs", "yaml")
